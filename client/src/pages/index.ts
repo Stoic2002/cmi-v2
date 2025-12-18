@@ -1,0 +1,11 @@
+export { Dashboard } from './Dashboard';
+export { Login } from './Login';
+export { Register } from './Register';
+export { Onboarding } from './Onboarding';
+export { Courses } from './Courses';
+export { CourseDetail } from './CourseDetail';
+export { Lesson } from './Lesson';
+export { AITutor } from './AITutor';
+export { Leaderboard } from './Leaderboard';
+export { Achievements } from './Achievements';
+export { Profile } from './Profile';
