@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, CheckCircle, ChevronRight, Globe, Award, Sparkles, BookOpen, Star, Rocket } from 'lucide-react';
+import { Target, CheckCircle, ChevronRight, ChevronLeft, Globe, Award, Sparkles, BookOpen, Star, Rocket } from 'lucide-react';
 import { Button, Loading } from '../../components/common';
 import { useAuthStore, useUserStore } from '../../stores';
 import { LANGUAGES, LEVELS, GOALS } from '../../utils/constants';
@@ -8,7 +8,7 @@ import { LANGUAGES, LEVELS, GOALS } from '../../utils/constants';
 export const Onboarding: React.FC = () => {
     const navigate = useNavigate();
     const { user, updateProfile, isLoading } = useAuthStore();
-    const { fetchLeaderboard, fetchAchievements } = useUserStore(); // Initialize user data
+    const { fetchLeaderboard, fetchAchievements } = useUserStore();
     const [step, setStep] = React.useState(1);
     const [selectedLanguage, setSelectedLanguage] = React.useState<string | null>(null);
     const [selectedLevel, setSelectedLevel] = React.useState<string | null>(null);
@@ -19,27 +19,39 @@ export const Onboarding: React.FC = () => {
         if (user?.currentLevel) setSelectedLevel(user.currentLevel);
     }, [user]);
 
-    const handleLanguageSelect = async (langCode: string) => {
-        setSelectedLanguage(langCode);
-        await updateProfile({ targetLanguage: langCode });
+    // Handle Next button for step 1 (Language)
+    const handleStep1Next = () => {
+        if (!selectedLanguage) return;
+
+        // Optimistic update - move next immediately
         setStep(2);
+
+        // Save in background
+        updateProfile({ targetLanguage: selectedLanguage }).catch(error => {
+            console.error('Failed to update language:', error);
+        });
     };
 
-    const handleLevelSelect = async (levelId: string) => {
-        setSelectedLevel(levelId);
-        await updateProfile({ level: levelId });
+    // Handle Next button for step 2 (Level)
+    const handleStep2Next = () => {
+        if (!selectedLevel) return;
+
+        // Optimistic update - move next immediately
         setStep(3);
+
+        // Save in background
+        updateProfile({ level: selectedLevel }).catch(error => {
+            console.error('Failed to update level:', error);
+        });
     };
 
-    const handleGoalSelect = async (goalId: string) => {
-        setSelectedGoal(goalId);
-        // Assuming goal is stored in user preferences or similar, for now just proceeding
-        // await updateProfile({ goal: goalId });
+    // Handle Next button for step 3 (Goal)
+    const handleStep3Next = () => {
+        if (!selectedGoal) return;
         setStep(4);
     };
 
     const handleComplete = async () => {
-        // Initialize user data properly before redirecting
         try {
             await Promise.all([
                 fetchLeaderboard(),
@@ -69,7 +81,7 @@ export const Onboarding: React.FC = () => {
                 {Object.values(LANGUAGES).map((lang) => (
                     <button
                         key={lang.code}
-                        onClick={() => handleLanguageSelect(lang.code)}
+                        onClick={() => setSelectedLanguage(lang.code)}
                         className={`group relative flex flex-col items-center gap-4 p-8 rounded-xl border-2 transition-all duration-200 ${selectedLanguage === lang.code
                             ? 'bg-primary border-primary text-white shadow-md'
                             : 'bg-white border-slate-200 hover:border-primary/30 hover:shadow-sm'
@@ -87,6 +99,18 @@ export const Onboarding: React.FC = () => {
                         )}
                     </button>
                 ))}
+            </div>
+
+            {/* Next Button */}
+            <div className="flex justify-center mt-4">
+                <Button
+                    onClick={handleStep1Next}
+                    disabled={!selectedLanguage}
+                    className="px-8 py-3 text-lg font-semibold"
+                    rightIcon={<ChevronRight size={20} />}
+                >
+                    Lanjutkan
+                </Button>
             </div>
         </div>
     );
@@ -115,7 +139,7 @@ export const Onboarding: React.FC = () => {
                         return (
                             <button
                                 key={level.code}
-                                onClick={() => handleLevelSelect(level.code)}
+                                onClick={() => setSelectedLevel(level.code)}
                                 className={`group p-5 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-5 ${selectedLevel === level.code
                                     ? 'bg-accent border-accent text-white shadow-md'
                                     : 'bg-white border-slate-200 hover:border-slate-300'
@@ -134,9 +158,25 @@ export const Onboarding: React.FC = () => {
                     })}
                 </div>
 
-                <button onClick={() => setStep(1)} className="mx-auto text-slate-400 hover:text-slate-600 font-bold text-sm py-2 px-4 rounded-full hover:bg-slate-100 transition-colors">
-                    Kembali
-                </button>
+                {/* Navigation Buttons */}
+                <div className="flex justify-center gap-4 mt-4">
+                    <Button
+                        variant="secondary"
+                        onClick={() => setStep(1)}
+                        className="px-6 py-3"
+                        leftIcon={<ChevronLeft size={20} />}
+                    >
+                        Kembali
+                    </Button>
+                    <Button
+                        onClick={handleStep2Next}
+                        disabled={!selectedLevel}
+                        className="px-8 py-3 text-lg font-semibold"
+                        rightIcon={<ChevronRight size={20} />}
+                    >
+                        Lanjutkan
+                    </Button>
+                </div>
             </div>
         );
     };
@@ -155,7 +195,7 @@ export const Onboarding: React.FC = () => {
                 {Object.values(GOALS).map((goal) => (
                     <button
                         key={goal.id}
-                        onClick={() => handleGoalSelect(goal.id)}
+                        onClick={() => setSelectedGoal(goal.id)}
                         className={`group p-5 rounded-xl border-2 text-left transition-all duration-200 flex items-center gap-4 ${selectedGoal === goal.id
                             ? 'bg-primary border-primary text-white shadow-md'
                             : 'bg-white border-slate-200 hover:border-primary/20'
@@ -172,9 +212,25 @@ export const Onboarding: React.FC = () => {
                 ))}
             </div>
 
-            <button onClick={() => setStep(2)} className="mx-auto text-slate-400 hover:text-slate-600 font-bold text-sm py-2 px-4 rounded-full hover:bg-slate-100 transition-colors">
-                Kembali
-            </button>
+            {/* Navigation Buttons */}
+            <div className="flex justify-center gap-4 mt-4">
+                <Button
+                    variant="secondary"
+                    onClick={() => setStep(2)}
+                    className="px-6 py-3"
+                    leftIcon={<ChevronLeft size={20} />}
+                >
+                    Kembali
+                </Button>
+                <Button
+                    onClick={handleStep3Next}
+                    disabled={!selectedGoal}
+                    className="px-8 py-3 text-lg font-semibold"
+                    rightIcon={<ChevronRight size={20} />}
+                >
+                    Lanjutkan
+                </Button>
+            </div>
         </div>
     );
 
@@ -241,10 +297,10 @@ export const Onboarding: React.FC = () => {
             </header>
 
             <main className="flex-1 flex flex-col justify-center pb-20">
-                {step === 1 && renderStep1()}
-                {step === 2 && renderStep2()}
-                {step === 3 && renderStep3()}
-                {step === 4 && renderStep4()}
+                <div className={step === 1 ? 'block' : 'hidden'}>{renderStep1()}</div>
+                <div className={step === 2 ? 'block' : 'hidden'}>{renderStep2()}</div>
+                <div className={step === 3 ? 'block' : 'hidden'}>{renderStep3()}</div>
+                <div className={step === 4 ? 'block' : 'hidden'}>{renderStep4()}</div>
             </main>
         </div>
     );

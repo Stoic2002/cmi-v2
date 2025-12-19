@@ -8,7 +8,7 @@ import './index.css';
 
 // Protected route wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { token, isLoading, fetchUser } = useAuthStore();
+  const { token, fetchUser } = useAuthStore();
   const [checking, setChecking] = React.useState(true);
 
   React.useEffect(() => {
@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     checkAuth();
   }, []);
 
-  if (checking || isLoading) {
+  if (checking) {
     return <Loading fullScreen text="Memuat..." />;
   }
 

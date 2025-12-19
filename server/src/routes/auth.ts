@@ -12,9 +12,8 @@ const registerSchema = z.object({
     email: z.string().email('Email tidak valid'),
     password: z.string().min(6, 'Password minimal 6 karakter'),
     name: z.string().min(2, 'Nama minimal 2 karakter'),
-    targetLanguage: z.enum(['en', 'ko', 'ja'], {
-        errorMap: () => ({ message: 'Pilih bahasa: en (Inggris), ko (Korea), atau ja (Jepang)' })
-    }),
+    // targetLanguage is now optional - will be set during onboarding
+    targetLanguage: z.enum(['en', 'ko', 'ja']).optional().default('ja'),
 });
 
 const loginSchema = z.object({
@@ -172,12 +171,15 @@ router.get('/me', authMiddleware, asyncHandler(async (req: AuthRequest, res: Res
 
 // Update profile
 router.patch('/profile', authMiddleware, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { name, targetLanguage } = req.body;
+    const { name, targetLanguage, level } = req.body;
 
     const updateData: Record<string, unknown> = {};
     if (name) updateData.name = name;
     if (targetLanguage && ['en', 'ko', 'ja'].includes(targetLanguage)) {
         updateData.targetLanguage = targetLanguage;
+    }
+    if (level && ['beginner', 'elementary', 'intermediate', 'advanced'].includes(level)) {
+        updateData.currentLevel = level;
     }
 
     const user = await prisma.user.update({

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores';
-import { LANGUAGES } from '../../utils/constants';
 
 export const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -10,14 +9,27 @@ export const Register: React.FC = () => {
         name: '',
         email: '',
         password: '',
-        targetLanguage: '',
+        confirmPassword: '',
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setPasswordError('');
+
+        if (formData.password !== formData.confirmPassword) {
+            setPasswordError('Password tidak cocok');
+            return;
+        }
+
         try {
-            await register(formData);
+            await register({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+            });
             navigate('/onboarding');
         } catch {
             // Error handled by store
@@ -92,28 +104,6 @@ export const Register: React.FC = () => {
                         </div>
 
                         <div className="group">
-                            <label className="block text-gray-500 text-sm font-medium mb-2 ml-1">Language</label>
-                            <div className="relative flex items-center">
-                                <select
-                                    name="targetLanguage"
-                                    value={formData.targetLanguage}
-                                    onChange={handleChange}
-                                    className="w-full h-14 pl-12 pr-10 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 input-gradient appearance-none cursor-pointer"
-                                    required
-                                >
-                                    <option value="" disabled>Select a language</option>
-                                    {Object.values(LANGUAGES).map(lang => (
-                                        <option key={lang.code} value={lang.code}>
-                                            {lang.flag} {lang.nameId}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="material-symbols-outlined absolute left-4 text-gray-400 group-focus-within:text-primary transition-colors">translate</span>
-                                <span className="material-symbols-outlined absolute right-4 text-gray-400 pointer-events-none">expand_more</span>
-                            </div>
-                        </div>
-
-                        <div className="group">
                             <label className="block text-gray-500 text-sm font-medium mb-2 ml-1">Password</label>
                             <div className="relative flex items-center">
                                 <input
@@ -137,6 +127,35 @@ export const Register: React.FC = () => {
                                     </span>
                                 </button>
                             </div>
+                        </div>
+
+                        <div className="group">
+                            <label className="block text-gray-500 text-sm font-medium mb-2 ml-1">Konfirmasi Password</label>
+                            <div className="relative flex items-center">
+                                <input
+                                    className={`w-full h-14 pl-12 pr-12 rounded-lg bg-gray-50 border text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 input-gradient ${passwordError ? 'border-red-500' : 'border-gray-200'}`}
+                                    placeholder="••••••••"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    required
+                                    minLength={6}
+                                />
+                                <span className="material-symbols-outlined absolute left-4 text-gray-400 group-focus-within:text-primary transition-colors">lock</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-4 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">
+                                        {showConfirmPassword ? 'visibility' : 'visibility_off'}
+                                    </span>
+                                </button>
+                            </div>
+                            {passwordError && (
+                                <p className="text-red-500 text-sm mt-1 ml-1">{passwordError}</p>
+                            )}
                         </div>
 
                         <button
