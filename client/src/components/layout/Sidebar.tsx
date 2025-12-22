@@ -6,7 +6,6 @@ import {
     MessageCircle, // Replaced Robot with MessageCircle as Smart Toy equivalent
     Users,
     Settings,
-    LogOut,
     ChevronLeft,
     ChevronRight,
     School,
@@ -16,7 +15,7 @@ import {
 import { useAuthStore } from '../../stores';
 
 export const Sidebar: React.FC = () => {
-    const { user, logout } = useAuthStore();
+    const { user } = useAuthStore();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const toggleSidebar = () => {
@@ -71,7 +70,7 @@ export const Sidebar: React.FC = () => {
                                 <div className="min-w-0">
                                     <p className="font-bold text-sm text-slate-800 truncate">{user.name}</p>
                                     <p className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full inline-block mt-1">
-                                        Level {user.currentLevel === 'beginner' ? 1 : user.currentLevel === 'elementary' ? 2 : user.currentLevel === 'intermediate' ? 3 : 4}
+                                        Level {user.currentLevel}
                                     </p>
                                 </div>
                             </div>
@@ -128,17 +127,7 @@ export const Sidebar: React.FC = () => {
                 </nav>
 
                 {/* Footer */}
-                <div className="p-6 mt-auto">
-                    <button
-                        onClick={logout}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full group ${isCollapsed ? 'justify-center px-2' : ''
-                            }`}
-                        title="Keluar"
-                    >
-                        <LogOut size={22} className="shrink-0" />
-                        {!isCollapsed && <span className="text-sm font-medium">Keluar</span>}
-                    </button>
-                </div>
+
             </div>
         </aside>
     );

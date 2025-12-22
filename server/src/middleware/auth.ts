@@ -9,6 +9,7 @@ export interface AuthRequest extends Request {
         name: string;
         targetLanguage: string;
         currentLevel: string;
+        goal: string | null;
     };
 }
 
@@ -36,6 +37,7 @@ export const authMiddleware = async (
                 name: true,
                 targetLanguage: true,
                 currentLevel: true,
+                goal: true,
             },
         });
 
@@ -72,6 +74,7 @@ export const optionalAuth = async (
                     name: true,
                     targetLanguage: true,
                     currentLevel: true,
+                    goal: true,
                 },
             });
 

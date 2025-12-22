@@ -14,7 +14,7 @@ import {
     ArrowUpRight,
     ArrowRight
 } from 'lucide-react';
-import { Loading } from '../../components/common';
+import { ShimmerDashboard } from '../../components/common';
 import { useAuthStore, useUserStore, useCourseStore } from '../../stores';
 import { LANGUAGES, LEVELS } from '../../utils/constants';
 
@@ -38,7 +38,7 @@ export const Dashboard: React.FC = () => {
     }, [user?.targetLanguage]);
 
     if (isLoading) {
-        return <Loading fullScreen text="Memuat data..." />;
+        return <ShimmerDashboard />;
     }
 
     const languageInfo = user?.targetLanguage

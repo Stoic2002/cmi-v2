@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, CheckCircle, Lock, Play, Star } from 'lucide-react';
-import { Button, Card, CardBody, Loading } from '../../components/common';
+import { Button, Card, CardBody, ShimmerCourseDetail } from '../../components/common';
 import { useCourseStore } from '../../stores';
 import { LEVELS } from '../../utils/constants';
 
@@ -17,7 +17,7 @@ export const CourseDetail: React.FC = () => {
     }, [id]);
 
     if (isLoading || !currentCourse) {
-        return <Loading fullScreen text="Memuat kursus..." />;
+        return <ShimmerCourseDetail />;
     }
 
     const levelInfo = LEVELS[currentCourse.level as keyof typeof LEVELS];

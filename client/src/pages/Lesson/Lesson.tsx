@@ -1,7 +1,8 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CheckCircle, BookOpen, Lightbulb, Volume2, Star } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, BookOpen, Lightbulb, Volume2, Star, GraduationCap, X } from 'lucide-react';
 import { Button, Card, CardBody, Loading } from '../../components/common';
+import { GuidedLesson } from '../../components/features';
 import { useCourseStore, useQuizStore } from '../../stores';
 
 type LessonTab = 'content' | 'quiz';
@@ -16,6 +17,7 @@ export const Lesson: React.FC = () => {
     const [quizAnswer, setQuizAnswer] = React.useState('');
     const [quizResult, setQuizResult] = React.useState<{ isCorrect: boolean; message: string } | null>(null);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [showAIModal, setShowAIModal] = React.useState(false);
 
     React.useEffect(() => {
         if (id) {
@@ -205,7 +207,15 @@ export const Lesson: React.FC = () => {
                             </section>
                         )}
 
-                        <div className="flex justify-end pt-6 border-t border-slate-100">
+                        <div className="flex flex-col md:flex-row justify-between gap-3 pt-6 border-t border-slate-100">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowAIModal(true)}
+                                leftIcon={<GraduationCap size={16} />}
+                                className="md:w-auto w-full border-primary/30 text-primary hover:bg-primary/5"
+                            >
+                                Latihan dengan AI
+                            </Button>
                             <Button onClick={() => setActiveTab('quiz')} rightIcon={<ArrowRight size={16} />} className="w-full md:w-auto px-6 shadow-sm">
                                 Lanjut ke Quiz
                             </Button>
@@ -353,6 +363,39 @@ export const Lesson: React.FC = () => {
                     </div>
                 )}
             </main>
+
+            {/* AI Practice Modal */}
+            {showAIModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl w-full max-w-3xl h-[85vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                                    <GraduationCap size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900">Latihan dengan AI</h3>
+                                    <p className="text-xs text-slate-500">{currentLesson.titleId}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowAIModal(false)}
+                                className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        {/* Modal Content */}
+                        <div className="flex-1 overflow-hidden">
+                            <GuidedLesson
+                                lessonId={id}
+                                onComplete={() => setShowAIModal(false)}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

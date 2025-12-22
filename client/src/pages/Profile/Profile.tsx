@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     User,
     Mail,
@@ -14,19 +15,21 @@ import {
     BookOpen,
     Target
 } from 'lucide-react';
-import { Button, Input } from '../../components/common';
+import { Button, Input, ConfirmDialog } from '../../components/common';
 import { useAuthStore, useUserStore } from '../../stores';
 import { LANGUAGES, LEVELS } from '../../utils/constants';
 
 export const Profile: React.FC = () => {
+    const navigate = useNavigate();
     const { user, logout, updateProfile } = useAuthStore();
     const { progress, fetchProgress } = useUserStore();
     const [isEditing, setIsEditing] = React.useState(false);
     const [isSaving, setIsSaving] = React.useState(false);
+    const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
     const [formData, setFormData] = React.useState({
         name: user?.name || '',
         targetLanguage: user?.targetLanguage || 'en',
-        currentLevel: user?.currentLevel || 'beginner',
+        currentLevel: user?.currentLevel || 'A1',
     });
 
     React.useEffect(() => {
@@ -170,7 +173,7 @@ export const Profile: React.FC = () => {
                                                     ? 'border-primary bg-primary/5 text-primary ring-2 ring-primary/10'
                                                     : 'border-slate-200 hover:border-slate-300 text-slate-600'
                                                     }`}
-                                                onClick={() => setFormData({ ...formData, currentLevel: level.code as 'beginner' | 'elementary' | 'intermediate' | 'advanced' })}
+                                                onClick={() => setFormData({ ...formData, currentLevel: level.code })}
                                             >
                                                 {level.name}
                                             </button>
@@ -201,12 +204,12 @@ export const Profile: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-lg text-slate-900">{levelInfo?.name}</span>
-                                    {/* Mapping level to a short code for display */}
-                                    <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-200">
-                                        {user?.currentLevel === 'beginner' ? 'A1' :
-                                            user?.currentLevel === 'elementary' ? 'A2' :
-                                                user?.currentLevel === 'intermediate' ? 'B1' : 'B2'}
-                                    </span>
+                                    {/* CEFR level is now directly stored, show local standard if available */}
+                                    {levelInfo?.localStandard && user?.targetLanguage && levelInfo.localStandard[user.targetLanguage as keyof typeof levelInfo.localStandard] !== '-' && (
+                                        <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-200">
+                                            {levelInfo.localStandard[user.targetLanguage as keyof typeof levelInfo.localStandard]}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -320,13 +323,28 @@ export const Profile: React.FC = () => {
                         </div>
                     </div>
                     <button
-                        onClick={logout}
+                        onClick={() => setShowLogoutDialog(true)}
                         className="w-full md:w-auto px-6 py-2.5 rounded-lg border border-red-200 text-red-600 font-bold hover:bg-red-50 transition-colors"
                     >
                         Keluar
                     </button>
                 </div>
             </div>
+
+            {/* Logout Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={showLogoutDialog}
+                onClose={() => setShowLogoutDialog(false)}
+                onConfirm={() => {
+                    logout();
+                    navigate('/login');
+                }}
+                title="Keluar dari Akun"
+                message="Apakah Anda yakin ingin keluar dari akun? Anda perlu login kembali untuk mengakses aplikasi."
+                confirmText="Ya, Keluar"
+                cancelText="Tidak"
+                variant="danger"
+            />
 
         </div>
     );

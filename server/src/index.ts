@@ -11,7 +11,9 @@ import coursesRoutes from './routes/courses.js';
 import lessonsRoutes from './routes/lessons.js';
 import quizzesRoutes from './routes/quizzes.js';
 import aiTutorRoutes from './routes/ai-tutor.js';
+import guidedLessonRoutes from './routes/guided-lesson.js';
 import progressRoutes from './routes/progress.js';
+import exercisesRoutes from './routes/exercises.js';
 
 dotenv.config();
 
@@ -43,7 +45,9 @@ app.use('/api/courses', coursesRoutes);
 app.use('/api/lessons', lessonsRoutes);
 app.use('/api/quizzes', quizzesRoutes);
 app.use('/api/ai-tutor', aiTutorRoutes);
+app.use('/api/guided-lesson', guidedLessonRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/exercises', exercisesRoutes);
 
 // Error handling
 app.use(notFound);

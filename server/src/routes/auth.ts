@@ -159,6 +159,7 @@ router.get('/me', authMiddleware, asyncHandler(async (req: AuthRequest, res: Res
             name: true,
             targetLanguage: true,
             currentLevel: true,
+            goal: true,
             xp: true,
             streak: true,
             lastActiveDate: true,
@@ -171,7 +172,7 @@ router.get('/me', authMiddleware, asyncHandler(async (req: AuthRequest, res: Res
 
 // Update profile
 router.patch('/profile', authMiddleware, asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { name, targetLanguage, level } = req.body;
+    const { name, targetLanguage, level, goal } = req.body;
 
     const updateData: Record<string, unknown> = {};
     if (name) updateData.name = name;
@@ -180,6 +181,9 @@ router.patch('/profile', authMiddleware, asyncHandler(async (req: AuthRequest, r
     }
     if (level && ['beginner', 'elementary', 'intermediate', 'advanced'].includes(level)) {
         updateData.currentLevel = level;
+    }
+    if (goal && ['work', 'study', 'travel', 'hobby'].includes(goal)) {
+        updateData.goal = goal;
     }
 
     const user = await prisma.user.update({

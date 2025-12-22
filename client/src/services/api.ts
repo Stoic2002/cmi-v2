@@ -42,7 +42,7 @@ export const authApi = {
     login: (data: { email: string; password: string }) =>
         api.post('/auth/login', data),
     getMe: () => api.get('/auth/me'),
-    updateProfile: (data: { name?: string; targetLanguage?: string; level?: string }) =>
+    updateProfile: (data: { name?: string; targetLanguage?: string; level?: string; goal?: string }) =>
         api.patch('/auth/profile', data),
 };
 
@@ -94,4 +94,14 @@ export const progressApi = {
         api.get('/progress/achievements'),
     getLeaderboard: (language?: string) =>
         api.get('/progress/leaderboard', { params: { language } }),
+};
+
+// Guided Lesson API
+export const guidedLessonApi = {
+    start: (data: { lessonId?: string; topic?: string; mode?: 'learn' | 'practice' | 'quiz' }) =>
+        api.post('/guided-lesson/start', data),
+    respond: (data: { sessionId: string; userResponse: string }) =>
+        api.post('/guided-lesson/respond', data),
+    getTopics: () =>
+        api.get('/guided-lesson/topics'),
 };

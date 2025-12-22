@@ -12,31 +12,35 @@ model User {
   email          String    @unique
   password       String
   name           String
-  targetLanguage String    // en, ko, ja
-  currentLevel   String    @default("beginner") // beginner, elementary, intermediate, advanced
+  targetLanguage String // en, ko, ja
+  currentLevel   String    @default("A1") // CEFR levels: A1, A2, B1, B2, C1, C2
+  goal           String? // work, study, travel, hobby - learning purpose
   xp             Int       @default(0)
   streak         Int       @default(0)
   lastActiveDate DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  progress      UserProgress[]
-  quizAttempts  QuizAttempt[]
-  conversations AIConversation[]
-  achievements  UserAchievement[]
+  progress       UserProgress[]
+  quizAttempts   QuizAttempt[]
+  conversations  AIConversation[]
+  achievements   UserAchievement[]
+  guidedSessions GuidedSession[]
 }
 
 model Course {
-  id          String   @id @default(uuid())
-  language    String   // en, ko, ja
-  level       String   // beginner, elementary, intermediate, advanced
-  title       String
-  titleId     String   // Indonesian title
-  description String
+  id            String   @id @default(uuid())
+  language      String // en, ko, ja
+  level         String // CEFR levels: A1, A2, B1, B2, C1, C2
+  localStandard String? // JLPT (N5-N1) or TOPIK (1-6) mapping
+  title         String
+  titleId       String // Indonesian title
+  description   String
   descriptionId String // Indonesian description
-  order       Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  canDo         Json? // CEFR "Can-Do" statements for this course
+  order         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   lessons Lesson[]
 
@@ -47,8 +51,8 @@ model Lesson {
   id        String   @id @default(uuid())
   courseId  String
   title     String
-  titleId   String   // Indonesian title
-  content   Json     // Structured content (vocab, grammar, examples)
+  titleId   String // Indonesian title
+  content   Json // Structured content (vocab, grammar, examples)
   order     Int
   xpReward  Int      @default(10)
   createdAt DateTime @default(now())
@@ -62,16 +66,16 @@ model Lesson {
 }
 
 model Quiz {
-  id       String   @id @default(uuid())
-  lessonId String
-  type     String   // multiple_choice, fill_blank, speaking, listening
-  question String
+  id         String   @id @default(uuid())
+  lessonId   String
+  type       String // multiple_choice, fill_blank, speaking, listening
+  question   String
   questionId String // Indonesian question
-  options  Json?    // Array of options
-  answer   String
-  xpReward Int      @default(5)
-  order    Int
-  createdAt DateTime @default(now())
+  options    Json? // Array of options
+  answer     String
+  xpReward   Int      @default(5)
+  order      Int
+  createdAt  DateTime @default(now())
 
   lesson   Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   attempts QuizAttempt[]
@@ -111,10 +115,10 @@ model QuizAttempt {
 model AIConversation {
   id        String   @id @default(uuid())
   userId    String
-  type      String   // free_chat, pronunciation, roleplay, grammar_drill, vocabulary
-  topic     String?  // Optional topic/scenario
-  messages  Json     // Array of messages [{role, content, timestamp}]
-  feedback  Json?    // AI feedback summary
+  type      String // free_chat, pronunciation, roleplay, grammar_drill, vocabulary
+  topic     String? // Optional topic/scenario
+  messages  Json // Array of messages [{role, content, timestamp}]
+  feedback  Json? // AI feedback summary
   xpEarned  Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -123,15 +127,15 @@ model AIConversation {
 }
 
 model Achievement {
-  id          String @id @default(uuid())
-  name        String
-  nameId      String // Indonesian name
-  description String
+  id            String   @id @default(uuid())
+  name          String
+  nameId        String // Indonesian name
+  description   String
   descriptionId String // Indonesian description
-  icon        String
-  condition   Json   // Condition to unlock {type, value}
-  xpReward    Int
-  createdAt   DateTime @default(now())
+  icon          String
+  condition     Json // Condition to unlock {type, value}
+  xpReward      Int
+  createdAt     DateTime @default(now())
 
   users UserAchievement[]
 }
@@ -146,4 +150,81 @@ model UserAchievement {
   achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
+}
+
+// AI Tutor Topics for Guided Lessons
+model Topic {
+  id          String   @id @default(uuid())
+  language    String // en, ko, ja
+  slug        String // unique identifier: greetings, workplace
+  title       String // Display title with native script
+  titleId     String // Indonesian title
+  description String // Indonesian description
+  category    String // basics, work, safety, daily
+  order       Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@unique([language, slug])
+  @@index([language, isActive])
+}
+
+// AI Tutor Scenarios for Roleplay
+model Scenario {
+  id          String   @id @default(uuid())
+  language    String // en, ko, ja
+  slug        String // unique identifier
+  title       String // Display title with native script
+  titleId     String // Indonesian title
+  description String // Indonesian description
+  category    String // general, factory, work, daily, safety, etc.
+  context     String?  @db.Text // AI context for roleplay
+  order       Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@unique([language, slug])
+  @@index([language, isActive])
+}
+
+// Interactive Exercises for Grammar Drills
+model Exercise {
+  id          String   @id @default(uuid())
+  language    String // en, ko, ja
+  type        String // matching, fill_blank, word_order, particle, conjugation, translate
+  level       String // A1, A2, B1, B2, C1, C2
+  category    String // grammar, vocabulary, particle, conjugation, translation
+  question    String
+  questionId  String // Indonesian question
+  hint        String?
+  data        Json // Type-specific data (options, pairs, words, etc.)
+  answer      Json // Correct answer(s)
+  explanation String?  @db.Text
+  order       Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([language, level, category])
+  @@index([language, type])
+}
+
+// Guided Lesson Sessions (persistent storage)
+model GuidedSession {
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String?
+  topic       String?
+  mode        String // learn, practice, quiz
+  currentStep Int      @default(1)
+  totalSteps  Int
+  context     String?  @db.Text
+  history     Json // Array of messages
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

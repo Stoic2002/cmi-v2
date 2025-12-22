@@ -4,6 +4,7 @@ export interface User {
     name: string;
     targetLanguage: 'en' | 'ko' | 'ja';
     currentLevel: 'beginner' | 'elementary' | 'intermediate' | 'advanced';
+    goal?: 'work' | 'study' | 'travel' | 'hobby';
     xp: number;
     streak: number;
     lastActiveDate: string | null;

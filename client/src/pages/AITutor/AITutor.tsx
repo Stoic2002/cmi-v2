@@ -1,11 +1,13 @@
 import React from 'react';
-import { Send, Loader2, MessageCircle, Mic, Users, BookOpen, Languages, Plus, Sparkles, Wand2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { Send, Loader2, MessageCircle, Mic, Users, BookOpen, Languages, Plus, Sparkles, Wand2, GraduationCap } from 'lucide-react';
 import { Button, Card, CardBody } from '../../components/common';
-import { PronunciationPractice, InteractiveExercises } from '../../components/features';
+import { PronunciationPractice, InteractiveExercises, GuidedLesson } from '../../components/features';
 import { useAuthStore, useAITutorStore } from '../../stores';
 import { AI_TUTOR_MODES, LANGUAGES } from '../../utils/constants';
 
 const modeIcons: Record<string, React.ReactNode> = {
+    guided_lesson: <GraduationCap size={20} />,
     free_chat: <MessageCircle size={20} />,
     pronunciation: <Mic size={20} />,
     roleplay: <Users size={20} />,
@@ -70,9 +72,14 @@ export const AITutor: React.FC = () => {
     };
 
     // Check if mode uses interactive component instead of chat
-    const isInteractiveMode = currentMode === 'pronunciation' || currentMode === 'grammar_drill';
+    const isInteractiveMode = currentMode === 'pronunciation' || currentMode === 'grammar_drill' || currentMode === 'guided_lesson';
 
     const renderMainContent = () => {
+        // Guided lesson mode - use GuidedLesson component
+        if (currentMode === 'guided_lesson') {
+            return <GuidedLesson />;
+        }
+
         // Pronunciation mode - use PronunciationPractice component
         if (currentMode === 'pronunciation') {
             return <PronunciationPractice />;
@@ -125,9 +132,26 @@ export const AITutor: React.FC = () => {
                                         ? 'bg-primary text-white rounded-br-none shadow-primary/20'
                                         : 'bg-white border border-slate-100 text-slate-700 rounded-bl-none shadow-soft'
                                         }`}>
-                                        {msg.content.split('\n').map((line, i) => (
-                                            <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
-                                        ))}
+                                        {msg.role === 'assistant' ? (
+                                            <ReactMarkdown
+                                                components={{
+                                                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                                    strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
+                                                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                                                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                                                    li: ({ children }) => <li className="ml-2">{children}</li>,
+                                                    code: ({ children }) => <code className="bg-slate-100 px-1 py-0.5 rounded text-primary font-mono text-xs">{children}</code>,
+                                                    h1: ({ children }) => <h1 className="text-lg font-bold mb-2">{children}</h1>,
+                                                    h2: ({ children }) => <h2 className="text-base font-bold mb-2">{children}</h2>,
+                                                    h3: ({ children }) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                                                    blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-slate-600">{children}</blockquote>,
+                                                }}
+                                            >
+                                                {msg.content}
+                                            </ReactMarkdown>
+                                        ) : (
+                                            <p>{msg.content}</p>
+                                        )}
                                     </div>
                                 </div>
                             ))}

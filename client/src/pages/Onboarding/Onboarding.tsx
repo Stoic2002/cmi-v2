@@ -48,7 +48,14 @@ export const Onboarding: React.FC = () => {
     // Handle Next button for step 3 (Goal)
     const handleStep3Next = () => {
         if (!selectedGoal) return;
+
+        // Optimistic update - move next immediately
         setStep(4);
+
+        // Save goal in background
+        updateProfile({ goal: selectedGoal }).catch(error => {
+            console.error('Failed to update goal:', error);
+        });
     };
 
     const handleComplete = async () => {
